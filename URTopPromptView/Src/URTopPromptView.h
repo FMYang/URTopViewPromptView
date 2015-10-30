@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+typedef void(^AnimatedCompleteBlock)();
+
 @interface URTopPromptView : NSObject
 
 + (void)showTopPromptViewText:(NSString *)promptText
@@ -18,6 +20,11 @@
                 dissmissAfter:(float)interval
                          view:(UIView *)aView;
 
++ (void)showTopPromptViewText:(NSString *)promptText
+                dissmissAfter:(float)interval
+                         view:(UIView *)aView
+                   startBlock:(void (^)())startBlock
+                completeBlock:(AnimatedCompleteBlock)completeBlock;
 
 + (void)dismiss;
 

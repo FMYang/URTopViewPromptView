@@ -14,12 +14,14 @@
 @property (nonatomic, strong) UIWindow *overlayWindow;
 @property (nonatomic, strong) UILabel *promptLabel;
 @property (nonatomic, strong) NSTimer *dismissTimer;
+@property (nonatomic, strong) AnimatedCompleteBlock animatedCompleteBlock;
 
 @end
 
 @implementation URTopPromptView
 @synthesize overlayWindow = _overlayWindow;
 @synthesize promptLabel = _promptLabel;
+@synthesize animatedCompleteBlock;
 
 + (URTopPromptView *)sharedInstance {
     static dispatch_once_t once;
@@ -47,7 +49,7 @@
 - (void)showTopPromptViewText:(NSString *)promptText view:(UIView *)aView
 {
     self.promptLabel.text = promptText;
-//    [self.overlayWindow setHidden:NO];
+    //    [self.overlayWindow setHidden:NO];
     [self animatedWithView:aView];
 }
 
@@ -65,8 +67,32 @@
                          view:(UIView *)aView
 {
     self.promptLabel.text = promptText;
-//    [self.overlayWindow setHidden:NO];
+    //    [self.overlayWindow setHidden:NO];
     [self animatedWithView:aView];
+}
+
++ (void)showTopPromptViewText:(NSString *)promptText
+                dissmissAfter:(float)interval
+                         view:(UIView *)aView
+                   startBlock:(void (^)())startBlock
+                completeBlock:(AnimatedCompleteBlock)completeBlock
+{
+    [[self sharedInstance] showTopPromptViewText:promptText dissmissAfter:interval view:aView startBlock:startBlock completeBlock:completeBlock];
+    [self dismissAfter:interval];
+}
+
+- (void)showTopPromptViewText:(NSString *)promptText
+                dissmissAfter:(float)interval
+                         view:(UIView *)aView
+                   startBlock:(void (^)())startBlock
+                completeBlock:(AnimatedCompleteBlock)completeBlock
+{
+    self.promptLabel.text = promptText;
+    //    [self.overlayWindow setHidden:NO];
+    startBlock();
+    animatedCompleteBlock = completeBlock;
+    [self animatedWithView:aView];
+    
 }
 
 + (void)dismiss
@@ -91,10 +117,14 @@
     } completion:^(BOOL finished) {
         [_promptLabel removeFromSuperview];
         _promptLabel = nil;
-//        [self.overlayWindow removeFromSuperview];
-//        [self.overlayWindow setHidden:YES];
-//        self.overlayWindow.rootViewController = nil;
-//        _overlayWindow = nil;
+        if(animatedCompleteBlock)
+        {
+            animatedCompleteBlock();
+        }
+        //        [self.overlayWindow removeFromSuperview];
+        //        [self.overlayWindow setHidden:YES];
+        //        self.overlayWindow.rootViewController = nil;
+        //        _overlayWindow = nil;
     }];
 }
 
@@ -115,7 +145,7 @@
         _promptLabel.textColor = [UIColor colorWithHex:0x3b9cd3];
         _promptLabel.font = [UIFont systemFontOfSize:12];
         _promptLabel.textAlignment = NSTextAlignmentCenter;
-        _promptLabel.frame = CGRectMake(0, 65, [UIScreen mainScreen].bounds.size.width, 30);
+        _promptLabel.frame = CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, 30);
     }
     
     return _promptLabel;
@@ -123,7 +153,7 @@
 
 - (void)animatedWithView:(UIView *)aView
 {
-//    [self.overlayWindow.rootViewController.view addSubview:self.promptLabel];
+    //    [self.overlayWindow.rootViewController.view addSubview:self.promptLabel];
     [aView addSubview:_promptLabel];
     
     //缩放弹出动画
@@ -154,7 +184,7 @@
 //#if __IPHONE_OS_VERSION_MIN_REQUIRED < 70000 // only when deployment target is < ios7
 //        _overlayWindow.rootViewController.wantsFullScreenLayout = YES;
 //#endif
-//        
+//
 ////        [self updatePromptLabelFrame];
 //
 //    }
