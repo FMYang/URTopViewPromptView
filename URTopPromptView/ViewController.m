@@ -68,7 +68,7 @@
 //    isShow = !isShow;
 //    
     [URTopPromptView showTopPromptViewText:@"为您推荐10条新闻"
-                             dissmissAfter:2.5
+                             dissmissAfter:3.0
                                       view:self.view];
 
 }
